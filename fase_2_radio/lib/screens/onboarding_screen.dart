@@ -1,9 +1,12 @@
 import 'package:fase_2_radio/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:introduction_screen/introduction_screen.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class OnboardingScreen extends StatelessWidget {
   final introKey = GlobalKey<IntroductionScreenState>();
+
+  
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +44,16 @@ class OnboardingScreen extends StatelessWidget {
           footer: ElevatedButton(
             style: ElevatedButton.styleFrom(minimumSize: Size(250, 50),//moficar esto para centrar
             backgroundColor: Colors.blueGrey),
-            onPressed:(){}, 
+            onPressed:() async {
+              final status = await Permission.notification.request();
+
+              if(status.isGranted){
+                print("Permiso concedido");
+              } else if(status.isDenied){
+                print("Permiso denegado");
+              }
+
+            }, 
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

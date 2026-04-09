@@ -35,6 +35,11 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   introduction_screen: ^4.0.0 #dependecia agregada para screen
+  flutter_local_notifications: ^21.0.0
+  timezone: ^0.11.0
+  permission_handler: ^12.0.1
+  flutter_radio_player: ^4.0.1
+  just_audio: ^0.10.5
 
 dev_dependencies:
   flutter_test:

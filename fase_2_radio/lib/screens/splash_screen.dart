@@ -3,6 +3,9 @@ import 'dart:async';
 import 'package:fase_2_radio/screens/home_screen.dart';
 import 'package:fase_2_radio/screens/onboarding_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:timezone/data/latest.dart';
+import 'package:timezone/standalone.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -10,8 +13,10 @@ class SplashScreen extends StatefulWidget {
   @override
   State<SplashScreen> createState() => _SplashScreenState();
 }
-
+//para las notificaciones-lanzamiento
 class _SplashScreenState extends State<SplashScreen> {
+
+  final FlutterLocalNotificationsPlugin notificationsPlugin = FlutterLocalNotificationsPlugin();
 
   @override
   void initState(){
@@ -19,6 +24,22 @@ class _SplashScreenState extends State<SplashScreen> {
     Timer(Duration(seconds:5),
     ()=> Navigator.push(context, MaterialPageRoute(builder: (context) => OnboardingScreen(),))
     );
+  }
+  Future<void> init() async{
+    initializeTimeZones();
+
+    setLocalLocation(getLocation('America/Mexico_city')
+    );
+    const androidSettings =
+          AndroidInitializationSettings('@mipmap/launcher_icon');
+    const DarwinInitializationSettings iosSettings =
+          DarwinInitializationSettings();
+
+    const InitializationSettings initializationSettings = InitializationSettings(
+      android: androidSettings,
+      iOS: iosSettings
+    );
+    await notificationsPlugin.initialize(settings: initializationSettings);
   }
 
   @override
