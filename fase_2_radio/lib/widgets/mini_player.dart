@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fase_2_radio/helpers/providers/audio_provider.dart';
+import 'package:fase_2_radio/screens/player_screen.dart';
 
 class MiniPlayer extends StatelessWidget {
-  final Function() onTap;
-  
-  const MiniPlayer({Key? key, required this.onTap}) : super(key: key);
+  const MiniPlayer({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Consumer<AudioProvider>(
       builder: (context, audioProvider, child) {
         return GestureDetector(
-          onTap: onTap,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const PlayerScreen()),
+            );
+          },
           child: Container(
             margin: const EdgeInsets.all(12),
             decoration: BoxDecoration(
@@ -83,7 +87,7 @@ class MiniPlayer extends StatelessWidget {
                   ),
                   SizedBox(width: 12),
                   
-                  // Botón play/pause
+                  // Estado play/pause
                   Container(
                     width: 48,
                     height: 48,

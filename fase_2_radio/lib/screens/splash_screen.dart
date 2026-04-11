@@ -41,7 +41,7 @@ class _SplashScreenState extends State<SplashScreen> {
     setLocalLocation(getLocation('America/Mexico_City')
     );
     const androidSettings =
-          AndroidInitializationSettings('@mipmap/launcher_icon');
+          AndroidInitializationSettings('@mipmap/ic_launcher');
     const DarwinInitializationSettings iosSettings =
           DarwinInitializationSettings();
 

@@ -24,10 +24,21 @@ class EstacionCard extends StatelessWidget {
           const SizedBox(height: 10),
           Text(station.name),
           const SizedBox(height: 20),
-
-          IconButton(onPressed: (){ audio.playRadio(station.url, station.name
-          );},
-           icon: Icon(audio.isPlaying ? Icons.pause : Icons.play_arrow))
+          IconButton(onPressed: () async{
+            if(audio.isPlaying){
+              await audio.pause();
+            }else{
+              await audio.playRadio(station.url, station.name);
+            }
+          }, icon:
+           Icon( audio.isPlaying ? Icons.pause : Icons.play_arrow)
+           )
+          // IconButton(
+          //   onPressed: (){ 
+          //   audio.playRadio(station.url, station.name
+          // );},
+          //  icon:
+          //   Icon(audio.isPlaying ? Icons.pause : Icons.play_arrow))
         ],
       ),
     );

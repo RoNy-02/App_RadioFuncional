@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'splash_screen.dart';
 import 'package:fase_2_radio/widgets/program_carousel.dart';
 import 'package:fase_2_radio/widgets/station_card.dart';
+import 'package:fase_2_radio/widgets/mini_player.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -55,8 +56,19 @@ class HomeScreen extends StatelessWidget {
             ]
           ),
         ),
-        //CARRUSEL
-        body: const ProgramCarousel()
+        //CARRUSEL Y MINI PLAYER
+        body: Stack(
+          children: [
+            ProgramCarousel(),
+            // Mini Player en la parte inferior
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: MiniPlayer(),
+            ),
+          ],
+        )
         );
     }
   }

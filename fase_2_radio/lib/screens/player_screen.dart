@@ -1,8 +1,7 @@
 import 'package:fase_2_radio/helpers/providers/audio_provider.dart';
-import 'package:fase_2_radio/services/audio_service.dart';
 import 'package:flutter/material.dart';
-import 'package:just_audio/just_audio.dart';
 import 'package:provider/provider.dart';
+import 'dart:async';
 
 
 
@@ -15,67 +14,103 @@ class PlayerScreen extends StatefulWidget {
 }
 
 class _PlayerScreenState extends State<PlayerScreen> {
-  final AudioService _audioService = AudioService();
-  
-
+  late StreamSubscription<dynamic> _playingStateSubscription;
 
   @override
   void initState() {
     super.initState();
-
-    Future.microtask((){
-        final audioProvider = context.read<AudioProvider>();
-      });
-
-      _audioService.initRadio('https://stream.freepi.io:8010/stream');
+    final audioProvider = context.read<AudioProvider>();
     
-    _audioService.playerStateStream.listen((state){
-      setState(() {
-        isPlaying = state.playing;//para que se cmabie alternamente y sincronizada con play y pause
-      });
-
-    }); // aqui s llama a la funcion
+    // Escuchar cambios en el estado de reproducción
+    _playingStateSubscription = audioProvider.playerStateStream.listen((_) {
+      if (mounted) {
+        setState(() {
+          // El estado se actualiza automáticamente a través de Consumer
+        });
+      }
+    });
   }
-
-  
 
   @override
   void dispose() {
-    _audioService.dispose(); // se cierra el reproductor al salir
+    _playingStateSubscription.cancel();
     super.dispose();
   }
-
-
-  bool isPlaying = true;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Radio Player")),
-      body: Row(
-        children: [
-        IconButton(
-          icon: const Icon(Icons.skip_previous),
-          onPressed: (){ _audioService.previous();
-          }, //=> _audioService.play(),
-        ),
-        IconButton(onPressed: () async{
-          if(isPlaying){
-            await _audioService.pause();
-          }else{
-            await _audioService.play();
-          }
-          setState(() {
-            isPlaying = !isPlaying;
-          });
-        }, 
-        icon: Icon(isPlaying ? Icons.pause : Icons.play_arrow)),
-        IconButton(
-          icon: const Icon(Icons.skip_next),
-          onPressed: (){_audioService.next();
-            },
-          )
-        ]
+      body: Consumer<AudioProvider>(
+        builder: (context, audioProvider, child) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  audioProvider.currentStationName,
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 20),
+                Container(
+                  width: 150,
+                  height: 150,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      colors: [
+                        Color.fromARGB(255, 84, 0, 253),
+                        Color.fromARGB(255, 203, 8, 8),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                  ),
+                  child: Icon(
+                    Icons.music_note,
+                    size: 80,
+                    color: Colors.white,
+                  ),
+                ),
+                SizedBox(height: 40),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.skip_previous),
+                      iconSize: 40,
+                      onPressed: () async {
+                        await audioProvider.previousStation();
+                      },
+                    ),
+                    SizedBox(width: 20),
+                    FloatingActionButton(
+                      onPressed: () async {
+                        if (audioProvider.isPlaying) {
+                          await audioProvider.pause();
+                        } else {
+                          await audioProvider.play();
+                        }
+                      },
+                      child: Icon(
+                        audioProvider.isPlaying ? Icons.pause : Icons.play_arrow,
+                        size: 32,
+                      ),
+                    ),
+                    SizedBox(width: 20),
+                    IconButton(
+                      icon: const Icon(Icons.skip_next),
+                      iconSize: 40,
+                      onPressed: () async {
+                        await audioProvider.nextStation();
+                      },
+                    )
+                  ],
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
