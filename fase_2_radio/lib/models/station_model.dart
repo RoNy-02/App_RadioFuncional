@@ -1,11 +1,11 @@
 //datos de la estacion
 
-class station{
+class Station{
   final String name;
   final String url;
   final String image;
 
-  station({
+  Station({
     required this.name,
     required this.url,
     required this.image,

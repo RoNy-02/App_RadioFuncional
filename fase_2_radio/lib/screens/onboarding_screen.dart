@@ -2,11 +2,10 @@ import 'package:fase_2_radio/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:introduction_screen/introduction_screen.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class OnboardingScreen extends StatelessWidget {
   final introKey = GlobalKey<IntroductionScreenState>();
-
-  
 
   @override
   Widget build(BuildContext context) {
@@ -46,13 +45,11 @@ class OnboardingScreen extends StatelessWidget {
             backgroundColor: Colors.blueGrey),
             onPressed:() async {
               final status = await Permission.notification.request();
-
               if(status.isGranted){
                 print("Permiso concedido");
               } else if(status.isDenied){
                 print("Permiso denegado");
               }
-
             }, 
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -77,7 +74,8 @@ class OnboardingScreen extends StatelessWidget {
           ),
           
       ],
-      showSkipButton: false,
+      
+      showSkipButton: true,
       showDoneButton: true,
       showBackButton: true,
         back: Text("Regresar",style:
@@ -91,9 +89,20 @@ class OnboardingScreen extends StatelessWidget {
         done: Text("Hecho",style:
          TextStyle(fontWeight: 
          FontWeight.w600,color: 
+         Colors.blueGrey),
+         ),
+        skip: Text("Omitir",style:
+         TextStyle(fontWeight:
+        FontWeight.w600, color:
          Colors.blueGrey),),
-      onDone: () {Navigator.push(context, MaterialPageRoute(builder: (context)=>HomeScreen()));},
-      onSkip: () {Navigator.push(context, MaterialPageRoute(builder: (context)=>HomeScreen()));},
+      onDone: () async {
+        await _saveOnBoardingSeen();
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_)=>HomeScreen()));},//verificar ya no vuelva a aparecer
+
+      onSkip: () async {
+        await _saveOnBoardingSeen();
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => HomeScreen()));//pushreplacement para que no vuelva atras despues de skip
+      },
       dotsDecorator: DotsDecorator(
         size: Size.square(10),
         activeSize: Size(20, 10),
@@ -104,6 +113,12 @@ class OnboardingScreen extends StatelessWidget {
           borderRadius: BorderRadius.circular(25)
         )
       ),
+      
     );
   }
+}
+
+Future<void> _saveOnBoardingSeen() async{
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setBool("onboardingSeen", true);
 }

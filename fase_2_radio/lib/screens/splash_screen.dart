@@ -1,14 +1,14 @@
-import 'dart:async';
-
 import 'package:fase_2_radio/screens/home_screen.dart';
 import 'package:fase_2_radio/screens/onboarding_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:timezone/standalone.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
+  
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -21,14 +21,24 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState(){
     super.initState();
-    Timer(Duration(seconds:5),
-    ()=> Navigator.push(context, MaterialPageRoute(builder: (context) => OnboardingScreen(),))
-    );
+
+    init();//
+
+    WidgetsBinding.instance.addPostFrameCallback((_){
+      _checkOnboarding();
+    });
+
+    //causa conflicto con el splash screen
+    /*Timer(Duration(seconds:5),
+    ()=> Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => OnboardingScreen(),))
+    );*/
   }
+  
   Future<void> init() async{
     initializeTimeZones();
+    
 
-    setLocalLocation(getLocation('America/Mexico_city')
+    setLocalLocation(getLocation('America/Mexico_City')
     );
     const androidSettings =
           AndroidInitializationSettings('@mipmap/launcher_icon');
@@ -70,5 +80,17 @@ class _SplashScreenState extends State<SplashScreen> {
         ),
       ),
     );
+  }
+Future<void> _checkOnboarding()async{
+  final prefers = await SharedPreferences.getInstance();
+  final seen = prefers.getBool('onboardingSeen') ?? false;
+      
+
+  await Future.delayed(Duration(seconds: 5));// tiempo del splash-tiene que estar al mismo tiempo de segundos que el time de arriba
+  if (seen){//verificar que ya se vio el onboardin, si es asi se va a homescreen directamente
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (_)=> HomeScreen()));
+  }else{
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (_)=> OnboardingScreen()));
+  }
   }
 }
