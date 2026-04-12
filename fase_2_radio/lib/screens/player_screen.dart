@@ -1,119 +1,792 @@
-import 'package:fase_2_radio/helpers/providers/audio_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'dart:async';
-
-
+import '../helpers/providers/audio_provider.dart';
+import '../models/program_model.dart';
 
 class PlayerScreen extends StatefulWidget {
-  const PlayerScreen({super.key});
-
+  final bool isModal;
+  const PlayerScreen({super.key, this.isModal = false});
   @override
-  State<PlayerScreen> createState() => _PlayerScreenState(); // 'createState' en minúscula
-  
+  State<PlayerScreen> createState() => _PlayerScreenState();
 }
 
-class _PlayerScreenState extends State<PlayerScreen> {
-  late StreamSubscription<dynamic> _playingStateSubscription;
+class _PlayerScreenState extends State<PlayerScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _rotationController;
+  final Map<String, Map<String, List<ProgramModel>>> stationPrograms = {
+    'rtx': {
+      'Lunes': [
+        ProgramModel(
+          id: 'p1',
+          title: 'Mañana Alternativa',
+          description:
+              'Rock alternativo y entrevistas exclusivas. Disfruta de las mejores bandas y conoce historias detrás de la música. Ideal para empezar el día con energía y buena vibra.',
+          schedule: {'Lunes': '08:00 - 10:00'},
+          image: 'assets/images/Program1.jpg',
+        ),
+        ProgramModel(
+          id: 'p2',
+          title: 'Tarde Indie',
+          description:
+              'Indie, electrónica y tendencias underground. Descubre nuevos sonidos y artistas emergentes que están revolucionando la escena musical.',
+          schedule: {'Lunes': '16:00 - 18:00'},
+          image: 'assets/images/Program2.jpg',
+        ),
+      ],
+      'Martes': [
+        ProgramModel(
+          id: 'p3',
+          title: 'Jazz Fusion',
+          description:
+              'Jazz experimental y fusiones modernas. Un espacio para los amantes de la improvisación y la innovación musical.',
+          schedule: {'Martes': '10:00 - 12:00'},
+          image: 'assets/images/Program3.jpg',
+        ),
+        ProgramModel(
+          id: 'p4',
+          title: 'Noches Urbanas',
+          description:
+              'Hip-hop, rap y cultura urbana. Ritmos intensos y letras que cuentan historias de la ciudad.',
+          schedule: {'Martes': '20:00 - 22:00'},
+          image: 'assets/images/Program4.jpg',
+        ),
+      ],
+      'Miércoles': [
+        ProgramModel(
+          id: 'p5',
+          title: 'Electro Vibes',
+          description:
+              'Electrónica y dance para mitad de semana. Sube el volumen y déjate llevar por los beats más frescos.',
+          schedule: {'Miércoles': '18:00 - 20:00'},
+          image: 'assets/images/Program5.jpg',
+        ),
+      ],
+      'Jueves': [
+        ProgramModel(
+          id: 'p6',
+          title: 'Retro Hits',
+          description:
+              'Clásicos de los 80s y 90s. Revive los éxitos que marcaron época y déjate llevar por la nostalgia.',
+          schedule: {'Jueves': '14:00 - 16:00'},
+          image: 'assets/images/Program6.jpg',
+        ),
+      ],
+      'Viernes': [
+        ProgramModel(
+          id: 'p7',
+          title: 'Fiesta Latina',
+          description:
+              'Reggaetón, salsa y ritmos latinos. La mejor fiesta para arrancar el fin de semana con sabor y alegría.',
+          schedule: {'Viernes': '20:00 - 23:00'},
+          image: 'assets/images/Program7.jpg',
+        ),
+      ],
+      // Sábado y Domingo añadidos
+      'Sábado': [
+        ProgramModel(
+          id: 'p14',
+          title: 'Sábado Retro',
+          description:
+              'Lo mejor de los clásicos para el fin de semana. Canciones que nunca pasan de moda y recuerdos inolvidables.',
+          schedule: {'Sábado': '12:00 - 15:00'},
+          image: 'assets/images/Program8.jpg',
+        ),
+        ProgramModel(
+          id: 'p15',
+          title: 'Noches de DJ',
+          description:
+              'Sets de DJ y remixes para la noche sabatina. Vive la fiesta con mezclas exclusivas y la mejor energía.',
+          schedule: {'Sábado': '22:00 - 02:00'},
+          image: 'assets/images/Program9.jpg',
+        ),
+      ],
+      'Domingo': [
+        ProgramModel(
+          id: 'p16',
+          title: 'Domingo Chill',
+          description:
+              'Música relajada para cerrar la semana. Relájate y disfruta de melodías suaves y ambientes tranquilos.',
+          schedule: {'Domingo': '10:00 - 13:00'},
+          image: 'assets/images/Program10.jpg',
+        ),
+      ],
+    },
+  };
+  final List<Map<String, dynamic>> linkItems = const [
+    {
+      'label': 'Facebook',
+      'asset': 'assets/icons/Facebook.png',
+      'url':
+          'https://www.facebook.com/radioactivatx89.9?wtsid=rdr_01btUDnQhVaGthwGL&from_intent_redirect=1',
+    },
+    {
+      'label': 'Instagram',
+      'asset': 'assets/icons/Instagram_2.png',
+      'url': 'https://www.instagram.com/radioactivatx?igsh=M2piYzc1eGNiY29v',
+    },
+    {
+      'label': 'Twitter (X)',
+      'asset': 'assets/icons/Twiter.png',
+      'url': 'https://twitter.com/RadioactivaTx',
+    },
+    {
+      'label': 'YouTube',
+      'asset': 'assets/icons/Youtube.png',
+      'url': 'https://youtube.com/@radioactivatx?si=AZwNbDJzsPoLlxDB',
+    },
+    {
+      'label': 'TikTok',
+      'asset': 'assets/icons/Tiktok_2.png',
+      'url': 'https://www.tiktok.com/@radioactiva.tx?_r=1&_t=ZS-91jAkaMrlyP',
+    },
+    {
+      'label': 'Llamar',
+      'asset': 'assets/icons/Telefono_2.png',
+      'url': 'tel:+524141199003',
+    },
+    {
+      'label': 'Sitio Web',
+      'asset': 'assets/icons/Web.png',
+      'url': 'https://www.radioactivatx.org/',
+    },
+  ];
 
   @override
   void initState() {
     super.initState();
-    final audioProvider = context.read<AudioProvider>();
-    
-    // Escuchar cambios en el estado de reproducción
-    _playingStateSubscription = audioProvider.playerStateStream.listen((_) {
-      if (mounted) {
-        setState(() {
-          // El estado se actualiza automáticamente a través de Consumer
-        });
-      }
-    });
+    _rotationController = AnimationController(vsync: this, duration: const Duration(seconds: 10))..repeat();
   }
-
   @override
   void dispose() {
-    _playingStateSubscription.cancel();
+    _rotationController.dispose();
     super.dispose();
+  }
+
+  String _getTodayName() => ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'][DateTime.now().weekday - 1];
+
+  Future<void> _launchUrl(BuildContext context, String urlString) async => ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Enlace disponible: $urlString'), backgroundColor: Colors.green));
+
+  void _showLinkOptions() {
+    final primaryYellow = Theme.of(context).primaryColor;
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: 'Side Menu',
+      transitionDuration: const Duration(milliseconds: 300),
+      transitionBuilder: (c, a, s, child) => SlideTransition(
+        position: Tween(begin: const Offset(1, 0), end: Offset.zero).animate(CurvedAnimation(parent: a, curve: Curves.easeOut)),
+        child: child,
+      ),
+      pageBuilder: (c, a, s) => LinkOptionsDrawer(linkItems: linkItems, primaryColor: primaryYellow, onLinkTap: (u) => _launchUrl(context, u), onShareTap: () => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Función de Compartir activada.')))),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final audioProv = Provider.of<AudioProvider>(context);
+    final station = audioProv.currentStation;
+    final primaryYellow = Theme.of(context).primaryColor;
+    if (station == null) {
+      if (widget.isModal) {
+        WidgetsBinding.instance.addPostFrameCallback((_) => Navigator.of(context).pop());
+        return const SizedBox.shrink();
+      }
+      return const Center(child: Text("Selecciona una estación."));
+    }
+    audioProv.isPlaying ? _rotationController.repeat() : _rotationController.stop();
+
     return Scaffold(
-      appBar: AppBar(title: const Text("Radio Player")),
-      body: Consumer<AudioProvider>(
-        builder: (context, audioProvider, child) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+      body: Container(
+        decoration: const BoxDecoration(gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Color.fromARGB(255, 235, 255, 60), Color.fromARGB(221, 138, 182, 18), Colors.black])),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Stack(
               children: [
-                Text(
-                  audioProvider.currentStationName,
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 20),
-                Container(
-                  width: 150,
-                  height: 150,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: LinearGradient(
-                      colors: [
-                        Color.fromARGB(255, 84, 0, 253),
-                        Color.fromARGB(255, 203, 8, 8),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                  ),
-                  child: Icon(
-                    Icons.music_note,
-                    size: 80,
-                    color: Colors.white,
-                  ),
-                ),
-                SizedBox(height: 40),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                Column(
                   children: [
-                    IconButton(
-                      icon: const Icon(Icons.skip_previous),
-                      iconSize: 40,
-                      onPressed: () async {
-                        await audioProvider.previousStation();
-                      },
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        widget.isModal ? IconButton(icon: Icon(Icons.keyboard_arrow_down, color: primaryYellow, size: 32), onPressed: () { Navigator.of(context).pop(); audioProv.showMiniPlayer(); }) : const SizedBox(width: 32),
+                        IconButton(icon: Icon(Icons.more_vert, color: primaryYellow, size: 32), onPressed: _showLinkOptions),
+                      ],
                     ),
-                    SizedBox(width: 20),
-                    FloatingActionButton(
-                      onPressed: () async {
-                        if (audioProvider.isPlaying) {
-                          await audioProvider.pause();
-                        } else {
-                          await audioProvider.play();
-                        }
-                      },
-                      child: Icon(
-                        audioProvider.isPlaying ? Icons.pause : Icons.play_arrow,
-                        size: 32,
+                    const SizedBox(height: 30),
+                    RotationTransition(
+                      turns: _rotationController,
+                      child: Container(
+                        width: 280, height: 280,
+                        decoration: BoxDecoration(shape: BoxShape.circle, boxShadow: [BoxShadow(color: primaryYellow.withOpacity(0.4), blurRadius: 30, spreadRadius: 5)]),
+                        child: ClipOval(
+                          child: station.image.isNotEmpty
+                              ? (station.image.startsWith('http')
+                                    ? Image.network(station.image, fit: BoxFit.cover, errorBuilder: (_, __, ___) => Container(color: Colors.black, child: Icon(Icons.radio, size: 100, color: primaryYellow)))
+                                    : Image.asset(station.image, fit: BoxFit.cover, errorBuilder: (_, __, ___) => Container(color: Colors.black, child: Icon(Icons.radio, size: 100, color: primaryYellow))))
+                              : Container(color: Colors.black, child: Icon(Icons.radio, size: 100, color: primaryYellow)),
+                        ),
                       ),
                     ),
-                    SizedBox(width: 20),
-                    IconButton(
-                      icon: const Icon(Icons.skip_next),
-                      iconSize: 40,
-                      onPressed: () async {
-                        await audioProvider.nextStation();
+                    const SizedBox(height: 40),
+                    Consumer<AudioProvider>(
+                      builder: (_, ap, __) {
+                        final meta = ap.currentMetadataTitle;
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(meta, style: Theme.of(context).textTheme.headlineLarge?.copyWith(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 28, letterSpacing: 0.5) ?? const TextStyle(fontSize: 28, color: Colors.white, fontWeight: FontWeight.bold), textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis),
+                            const SizedBox(height: 10),
+                            Text(station.name, style: Theme.of(context).textTheme.titleMedium?.copyWith(color: primaryYellow, fontWeight: FontWeight.w600, fontSize: 18) ?? const TextStyle(fontSize: 16, color: Colors.white70), textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 4.0),
+                              child: Text(station.slogan, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white70, fontWeight: FontWeight.w400, fontSize: 15) ?? const TextStyle(fontSize: 15, color: Colors.white70), textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis),
+                            ),
+                          ],
+                        );
                       },
-                    )
+                    ),
+                    const SizedBox(height: 40),
+                    Consumer<AudioProvider>(
+                      builder: (_, ap, __) {
+                        final isPlaying = ap.isPlaying;
+                        final isLoading = ap.isLoading;
+                        return Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            IconButton(iconSize: 60, onPressed: isLoading ? null : () => ap.playPreviousStation(), icon: const Icon(Icons.skip_previous, color: Colors.white)),
+                            IconButton(
+                              iconSize: 100,
+                              onPressed: isLoading ? null : () { isPlaying ? ap.pause() : ap.play(); },
+                              icon: Container(
+                                width: 100, height: 100,
+                                decoration: BoxDecoration(shape: BoxShape.circle, color: primaryYellow, boxShadow: [BoxShadow(color: primaryYellow.withOpacity(0.5), blurRadius: 15, spreadRadius: 2)]),
+                                child: isLoading ? const SizedBox(width: 40, height: 40, child: CircularProgressIndicator(strokeWidth: 5, valueColor: AlwaysStoppedAnimation<Color>(Colors.black))) : Icon(isPlaying ? Icons.pause : Icons.play_arrow, color: Colors.black, size: 45),
+                              ),
+                            ),
+                            IconButton(iconSize: 60, onPressed: isLoading ? null : () => ap.playNextStation(), icon: const Icon(Icons.skip_next, color: Colors.white)),
+                          ],
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 40),
                   ],
                 ),
+                if (station.id == 'ljr')
+                  Align(alignment: Alignment.bottomCenter, child: Padding(padding: const EdgeInsets.only(bottom: 24.0), child: Text('No hay programas disponibles', style: TextStyle(color: Colors.white70, fontSize: 18, fontWeight: FontWeight.bold))))
+                else if (stationPrograms[station.id] != null)
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: GestureDetector(
+                      onTap: () {
+                        // ver el día actual y elegir si existe y si no 0
+                        final stationId = station.id;
+                        final days = stationPrograms[stationId]!.keys.toList();
+                        int currentDayIdx = days.indexOf(_getTodayName());
+                        if (currentDayIdx < 0) currentDayIdx = 0;
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: Colors.white,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.vertical(
+                              top: Radius.circular(24),
+                            ),
+                          ),
+                          builder: (ctx) {
+                            return StatefulBuilder(
+                              builder: (context, setModalState) {
+                                final Color modalYellow = Theme.of(
+                                  context,
+                                ).primaryColor;
+                                final stationId = station.id;
+                                final days = stationPrograms[stationId]!.keys
+                                    .toList();
+                                return DraggableScrollableSheet(
+                                  initialChildSize: 0.6,
+                                  minChildSize: 0.25,
+                                  maxChildSize: 0.95,
+                                  expand: false,
+                                  builder: (context, scrollController) {
+                                    return Container(
+                                      decoration: const BoxDecoration(
+                                        color: Colors.transparent,
+                                      ),
+                                      child: Column(
+                                        children: [
+                                          Container(
+                                            width: 60,
+                                            height: 6,
+                                            margin: const EdgeInsets.only(
+                                              top: 12,
+                                              bottom: 8,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: Colors.white24,
+                                              borderRadius:
+                                                  BorderRadius.circular(3),
+                                            ),
+                                          ),
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              IconButton(
+                                                icon: const Icon(
+                                                  Icons.arrow_left,
+                                                  color: Colors.black,
+                                                  size: 32,
+                                                ),
+                                                onPressed: () {
+                                                  if (currentDayIdx > 0) {
+                                                    setModalState(() {
+                                                      currentDayIdx--;
+                                                    });
+                                                  }
+                                                },
+                                              ),
+                                              Text(
+                                                days[currentDayIdx],
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .titleLarge
+                                                    ?.copyWith(color: Colors.black,
+                                                      fontWeight:FontWeight.bold,),
+                                              ),
+                                              IconButton(
+                                                icon: const Icon(
+                                                  Icons.arrow_right,
+                                                  color: Colors.black,
+                                                  size: 32,
+                                                ),
+                                                onPressed: () {
+                                                  if (currentDayIdx <
+                                                      days.length - 1) {
+                                                    setModalState(() {
+                                                      currentDayIdx++;
+                                                    });
+                                                  }
+                                                },
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Expanded(
+                                            child: ListView.builder(
+                                              controller: scrollController,
+                                              itemCount:
+                                                  stationPrograms[stationId]![days[currentDayIdx]]!
+                                                      .length,
+                                              itemBuilder: (context, idx) {
+                                                final p =
+                                                    stationPrograms[stationId]![days[currentDayIdx]]![idx];
+
+                                                return Padding(
+                                                  padding:
+                                                      const EdgeInsets.symmetric(
+                                                        vertical: 10.0,
+                                                        horizontal: 18.0,
+                                                      ),
+                                                  child: Card(
+                                                    color: Colors.white,
+                                                    elevation: 6,
+                                                    shadowColor: Colors.black54,
+                                                    shape: RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            0,
+                                                          ),
+                                                    ),
+                                                    child: Row(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .center,
+                                                      children: [
+                                                        // Caratula con sombra -
+                                                        Container(
+                                                          width: 100,
+                                                          height: 100,
+                                                          margin:
+                                                              const EdgeInsets.all(12,),
+                                                          decoration: BoxDecoration(
+                                                            borderRadius:
+                                                                BorderRadius.circular(16,),
+                                                            boxShadow: [
+                                                              BoxShadow(
+                                                                color: Colors.black.withOpacity(0.18,),
+                                                                blurRadius: 8,
+                                                                offset:const Offset(0,4,),),
+                                                            ],
+                                                            border: Border.all(
+                                                              color:
+                                                                  modalYellow,
+                                                              width: 2,
+                                                            ),
+                                                            image:
+                                                                p.image.isNotEmpty
+                                                                ? DecorationImage(
+                                                                    image:p.image.startsWith('http',)? NetworkImage(p.image,
+                                                                          ): AssetImage(p.image)
+                                                                              as ImageProvider,
+                                                                    fit: BoxFit
+                                                                        .cover,
+                                                                  )
+                                                                : null,
+                                                          ),
+                                                          child: p.image.isEmpty
+                                                              ? Icon(
+                                                                  Icons
+                                                                      .radio_outlined,
+                                                                  size: 44,
+                                                                  color:
+                                                                      modalYellow,
+                                                                )
+                                                              : null,
+                                                        ),
+                                                        // Contenido
+                                                        Expanded(
+                                                          child: Padding(
+                                                            padding:
+                                                                const EdgeInsets.symmetric(
+                                                                  vertical:
+                                                                      16.0,
+                                                                  horizontal:
+                                                                      8.0,
+                                                                ),
+                                                            child: Column(
+                                                              crossAxisAlignment:
+                                                                  CrossAxisAlignment
+                                                                      .start,
+                                                              children: [
+                                                                Row(
+                                                                  children: [
+                                                                    Expanded(
+                                                                      child: Text(
+                                                                        p.title,
+                                                                        style:
+                                                                            Theme.of(
+                                                                              context,
+                                                                            ).textTheme.titleLarge?.copyWith(
+                                                                              color: Colors.black,
+                                                                              fontWeight: FontWeight.bold,
+                                                                              fontSize: 20,
+                                                                            ) ??
+                                                                            const TextStyle(
+                                                                              color: Colors.black,
+                                                                              fontWeight: FontWeight.bold,
+                                                                              fontSize: 20,
+                                                                            ),
+                                                                        maxLines:
+                                                                            1,
+                                                                        overflow:
+                                                                            TextOverflow.ellipsis,
+                                                                      ),
+                                                                    ),
+                                                                    TextButton(
+                                                                      style: TextButton.styleFrom(
+                                                                        padding:
+                                                                            EdgeInsets.zero,
+                                                                        minimumSize:
+                                                                            const Size(
+                                                                              40,
+                                                                              20,
+                                                                            ),
+                                                                        tapTargetSize:
+                                                                            MaterialTapTargetSize.shrinkWrap,
+                                                                      ),
+                                                                      onPressed: () {
+                                                                        showDialog(
+                                                                          context:
+                                                                              context,
+                                                                          builder: (_) {
+                                                                            return Dialog(
+                                                                              backgroundColor: Colors.white,
+                                                                              shape: RoundedRectangleBorder(
+                                                                                borderRadius: BorderRadius.circular(
+                                                                                  18,
+                                                                                ),
+                                                                              ),
+                                                                              insetPadding: const EdgeInsets.symmetric(
+                                                                                horizontal: 18,
+                                                                                vertical: 32,
+                                                                              ),
+                                                                              child: Stack(
+                                                                                children: [
+                                                                                  Padding(
+                                                                                    padding: const EdgeInsets.all(
+                                                                                      0,
+                                                                                    ),
+                                                                                    child: Column(
+                                                                                      mainAxisSize: MainAxisSize.min,
+                                                                                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                                                                                      children: [
+                                                                                        // Imagen completa arriba
+                                                                                        if (p.image.isNotEmpty)
+                                                                                          ClipRRect(
+                                                                                            borderRadius: const BorderRadius.only(
+                                                                                              topLeft: Radius.circular(
+                                                                                                18,
+                                                                                              ),
+                                                                                              topRight: Radius.circular(
+                                                                                                18,
+                                                                                              ),
+                                                                                            ),
+                                                                                            child:
+                                                                                                p.image.startsWith(
+                                                                                                  'http',
+                                                                                                )
+                                                                                                ? Image.network(
+                                                                                                    p.image,
+                                                                                                    width: double.infinity,
+                                                                                                    height: 220,
+                                                                                                    fit: BoxFit.cover,
+                                                                                                    errorBuilder:
+                                                                                                        (
+                                                                                                          c,
+                                                                                                          e,
+                                                                                                          s,
+                                                                                                        ) => const SizedBox.shrink(),
+                                                                                                  )
+                                                                                                : Image.asset(
+                                                                                                    p.image,
+                                                                                                    width: double.infinity,
+                                                                                                    height: 220,
+                                                                                                    fit: BoxFit.cover,
+                                                                                                    errorBuilder:
+                                                                                                        (
+                                                                                                          c,
+                                                                                                          e,
+                                                                                                          s,
+                                                                                                        ) => const SizedBox.shrink(),
+                                                                                                  ),
+                                                                                          ),
+                                                                                        Padding(
+                                                                                          padding: const EdgeInsets.all(
+                                                                                            20.0,
+                                                                                          ),
+                                                                                          child: Column(
+                                                                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                            children: [
+                                                                                              Text(
+                                                                                                p.title,
+                                                                                                style: const TextStyle(
+                                                                                                  color: Colors.black,
+                                                                                                  fontWeight: FontWeight.bold,
+                                                                                                  fontSize: 22,
+                                                                                                ),
+                                                                                              ),
+                                                                                              const SizedBox(
+                                                                                                height: 16,
+                                                                                              ),
+                                                                                              Text(
+                                                                                                p.description,
+                                                                                                style: const TextStyle(
+                                                                                                  color: Colors.black,
+                                                                                                  fontSize: 17,
+                                                                                                ),
+                                                                                              ),
+                                                                                            ],
+                                                                                          ),
+                                                                                        ),
+                                                                                      ],
+                                                                                    ),
+                                                                                  ),
+                                                                                  // Botón X para cerrar
+                                                                                  Positioned(
+                                                                                    top: 10,
+                                                                                    right: 10,
+                                                                                    child: IconButton(
+                                                                                      icon: const Icon(
+                                                                                        Icons.close,
+                                                                                        color: Colors.white,
+                                                                                        size: 28,
+                                                                                      ),
+                                                                                      onPressed: () => Navigator.pop(
+                                                                                        context,
+                                                                                      ),
+                                                                                    ),
+                                                                                  ),
+                                                                                ],
+                                                                              ),
+                                                                            );
+                                                                          },
+                                                                        );
+                                                                      },
+                                                                      child: Text(
+                                                                        'Ver más',
+                                                                        style: TextStyle(
+                                                                          color:
+                                                                              modalYellow,
+                                                                          fontSize:
+                                                                              15,
+                                                                          fontWeight:
+                                                                              FontWeight.w600,
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                                const SizedBox(
+                                                                  height: 8,
+                                                                ),
+                                                                // Horarios como chips
+                                                                Wrap(
+                                                                  spacing: 6,
+                                                                  children: p.schedule.entries.map((
+                                                                    entry,
+                                                                  ) {
+                                                                    return Padding(
+                                                                      padding: const EdgeInsets.only(
+                                                                        right:
+                                                                            8.0,
+                                                                        bottom:
+                                                                            4.0,
+                                                                      ),
+                                                                      child: Text(
+                                                                        '${entry.key}: ${entry.value}',
+                                                                        style: const TextStyle(
+                                                                          color:
+                                                                              Colors.black,
+                                                                          fontWeight:
+                                                                              FontWeight.w600,
+                                                                        ),
+                                                                      ),
+                                                                    );
+                                                                  }).toList(),
+                                                                ),
+                                                                const SizedBox(
+                                                                  height: 8,
+                                                                ),
+                                                                Text(
+                                                                  p.description,
+                                                                  maxLines: 2,
+                                                                  overflow:
+                                                                      TextOverflow
+                                                                          .ellipsis,
+                                                                  style:
+                                                                      Theme.of(
+                                                                        context,
+                                                                      ).textTheme.bodyLarge?.copyWith(
+                                                                        color: Colors
+                                                                            .black,
+                                                                        fontSize:
+                                                                            15,
+                                                                      ) ??
+                                                                      const TextStyle(
+                                                                        color: Colors
+                                                                            .black,
+                                                                        fontSize:
+                                                                            15,
+                                                                      ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                );
+                                              },
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                );
+                              },
+                            );
+                          },
+                        );
+                      },
+                      child: Container(
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: const Color.fromARGB(255, 83, 82, 82),
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(24),
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              blurRadius: 12,
+                              spreadRadius: 2,
+                            ),
+                          ],
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 18),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 60,
+                              height: 6,
+                              margin: const EdgeInsets.only(bottom: 8),
+                              decoration: BoxDecoration(
+                                color: const Color.fromARGB(103, 255, 255, 255),
+                                borderRadius: BorderRadius.circular(3),
+                              ),
+                            ),
+                            Text(
+                              'Programación',
+                              style: Theme.of(context).textTheme.titleLarge
+                                  ?.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
               ],
             ),
-          );
-        },
+          ),
+        ),
       ),
     );
   }
-  
 }
 
+class LinkOptionsDrawer extends StatelessWidget {
+  final List<Map<String, dynamic>> linkItems;
+  final Color primaryColor;
+  final Function(String urlString) onLinkTap;
+  final VoidCallback onShareTap;
+  const LinkOptionsDrawer({super.key, required this.linkItems, required this.primaryColor, required this.onLinkTap, required this.onShareTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.centerRight,
+      child: Material(
+        color: const Color.fromARGB(160, 111, 109, 109),
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.25,
+          height: MediaQuery.of(context).size.height * 0.8,
+          decoration: BoxDecoration(color: Colors.grey[900], borderRadius: const BorderRadius.horizontal(left: Radius.circular(10)), boxShadow: [BoxShadow(color: Colors.white.withOpacity(0.5), blurRadius: 10)]),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: linkItems.map((item) => Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10.0),
+              child: IconButton(
+                iconSize: 40,
+                icon: Container(
+                  width: 45, height: 45,
+                  decoration: BoxDecoration(shape: BoxShape.circle, color: primaryColor),
+                  child: ClipOval(child: Image.asset(item['asset'] as String, width: 30, height: 30, fit: BoxFit.scaleDown, errorBuilder: (_, __, ___) => const Icon(Icons.link, color: Colors.black, size: 20))),
+                ),
+                onPressed: () {
+                  Navigator.pop(context);
+                  if (item.containsKey('url')) onLinkTap(item['url'] as String);
+                  else if (item['type'] == 'share') onShareTap();
+                },
+              ),
+            )).toList(),
+          ),
+        ),
+      ),
+    );
+  }
+}

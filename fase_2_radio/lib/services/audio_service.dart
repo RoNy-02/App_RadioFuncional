@@ -1,4 +1,3 @@
-import 'package:fase_2_radio/models/station_model.dart';
 import 'package:just_audio/just_audio.dart';
 
 class AudioService {

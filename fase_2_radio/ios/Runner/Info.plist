@@ -66,5 +66,16 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>https</string>
+		<string>http</string>
+		<string>tel</string>
+		<string>instagram</string>
+		<string>fb</string>
+		<string>twitter</string>
+		<string>youtube</string>
+		<string>tiktok</string>
+	</array>
 </dict>
 </plist>
