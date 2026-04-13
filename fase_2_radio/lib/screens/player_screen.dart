@@ -121,7 +121,7 @@ class _PlayerScreenState extends State<PlayerScreen>
     },
     {
       'label': 'Instagram',
-      'asset': 'assets/icons/Instagram_2.png',
+      'asset': 'assets/icons/Instagram.png',
       'url': 'https://www.instagram.com/radioactivatx?igsh=M2piYzc1eGNiY29v',
     },
     {
@@ -141,7 +141,7 @@ class _PlayerScreenState extends State<PlayerScreen>
     },
     {
       'label': 'Llamar',
-      'asset': 'assets/icons/Telefono_2.png',
+      'asset': 'assets/icons/Telefono.png',
       'url': 'tel:+524141199003',
     },
     {

@@ -31,17 +31,24 @@ class RadioAudioHandler extends BaseAudioHandler with SeekHandler {
   void _updateMediaItem() {
     final station = _currentStation;
 
+    Uri? artUri;
+    if (station.imageUrl != null && station.imageUrl!.isNotEmpty) {
+      artUri = Uri.parse(station.imageUrl!);
+    } else if (station.image.startsWith('http')) {
+      artUri = Uri.parse(station.image);
+    } else {
+      artUri = Uri.parse('asset:///${station.image}');//imagen de utills
+    }
     mediaItem.add(
       MediaItem(
         id: station.Url,
+        album: station.acronym,
         title: station.name,
         artist: station.slogan,
-        artUri: Uri.parse("asset:///${station.image}"),
+        artUri: artUri,
       ),
     );
   }
-
-  // 🔥 SET URL
   Future<void> setUrl(String url, {int? index}) async {
     if (index != null) {
       _currentIndex = index;

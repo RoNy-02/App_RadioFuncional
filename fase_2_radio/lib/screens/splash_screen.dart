@@ -61,7 +61,7 @@ class _SplashScreenState extends State<SplashScreen> {
         decoration: BoxDecoration(
           color: Colors.black,
           image: DecorationImage(
-            image: AssetImage("assets/images/imagen1.jpg"),//imagen del splash
+            image: AssetImage("assets/images/fondo.jpg"),//imagen del splash
             fit: BoxFit.cover, //para que se amplie la imagen
             opacity:0.4
           )
@@ -71,11 +71,11 @@ class _SplashScreenState extends State<SplashScreen> {
         children: [
           Icon(Icons.music_note_outlined,size: 300,color: Colors.white,
           ),
-            Text("RadioDay",
-              style: TextStyle(color: Colors.white,fontSize:48,
-              fontWeight: FontWeight.bold,
-              fontStyle: FontStyle.italic),
-            )
+            // Text("Radio",
+            //   style: TextStyle(color: Colors.white,fontSize:48,
+            //   fontWeight: FontWeight.bold,
+            //   fontStyle: FontStyle.italic),
+            // )
           ]
         ),
       ),
