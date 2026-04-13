@@ -1,46 +1,110 @@
+import 'package:audio_service/audio_service.dart';
 import 'package:just_audio/just_audio.dart';
+import '../helpers/constants.dart';
+import '../models/station_model.dart';
 
-class AudioService {
+class RadioAudioHandler extends BaseAudioHandler with SeekHandler {
   final AudioPlayer _player = AudioPlayer();
-  Stream<PlayerState> get playerStateStream => _player.playerStateStream;
 
-    Future<void> initRadio(String url) async {
-    try {
-      await _player.setUrl(url);
-    } catch (e) {
-      print("Error cargando radio: $e");
-    }
+  int _currentIndex = 0;
+
+  RadioAudioHandler() {
+    _player.playerStateStream.listen((state) {
+      playbackState.add(
+        PlaybackState(
+          controls: [
+            MediaControl.skipToPrevious,
+            state.playing ? MediaControl.pause : MediaControl.play,
+            MediaControl.skipToNext,
+            MediaControl.stop,
+          ],
+          androidCompactActionIndices: const [0, 1, 2],
+          playing: state.playing,
+          processingState: _transform(state.processingState),
+        ),
+      );
+    });
   }
 
-  final List<String> Stations = [
-    "https://stream.freepi.io/8012/live",
-    "https://stream.freepi.io/8010/stream",
-  ];
+  StationModel get _currentStation => stations[_currentIndex];
 
-  int currentIndex = 0;
-  //reproducir
-  Future<void> play() async{
+  void _updateMediaItem() {
+    final station = _currentStation;
+
+    mediaItem.add(
+      MediaItem(
+        id: station.Url,
+        title: station.name,
+        artist: station.slogan,
+        artUri: Uri.parse("asset:///${station.image}"),
+      ),
+    );
+  }
+
+  // 🔥 SET URL
+  Future<void> setUrl(String url, {int? index}) async {
+    if (index != null) {
+      _currentIndex = index;
+    }
+
+    _updateMediaItem();
+    await _player.setUrl(url);
+  }
+
+  @override
+  Future customAction(String name, [Map<String, dynamic>? extras]) async {
+    if (name == 'setUrl') {
+      await setUrl(
+        extras!['url'],
+        index: extras['index'],
+      );
+    }
+    return super.customAction(name, extras);
+  }
+
+  @override
+  Future<void> play() async {
     await _player.play();
   }
-  //pausar
-  Future<void> pause() async{
+
+  @override
+  Future<void> pause() async {
     await _player.pause();
   }
-  //siguiente
-  Future<void> next() async{
-    currentIndex = (currentIndex +1 )% Stations.length;
-    await _player.setUrl(Stations[currentIndex]);
-    await _player.play();
-  }
-  //anterior
-  void previous() async {
-    currentIndex = (currentIndex - 1 + Stations.length) % Stations.length;
-    await _player.setUrl(Stations[currentIndex]);
-    await _player.play();
-  }
-  //detener
-  Future<void> dispose() async{
-    await _player.dispose();
+
+  @override
+  Future<void> stop() async {
+    await _player.stop();
   }
 
+  @override
+  Future<void> skipToNext() async {
+    _currentIndex = (_currentIndex + 1) % stations.length;
+    final station = _currentStation;
+    await setUrl(station.Url);
+    await play();
+  }
+
+  @override
+  Future<void> skipToPrevious() async {
+    _currentIndex = (_currentIndex - 1 + stations.length) % stations.length;
+    final station = _currentStation;
+    await setUrl(station.Url);
+    await play();
+  }
+
+  AudioProcessingState _transform(ProcessingState state) {
+    switch (state) {
+      case ProcessingState.idle:
+        return AudioProcessingState.idle;
+      case ProcessingState.loading:
+        return AudioProcessingState.loading;
+      case ProcessingState.buffering:
+        return AudioProcessingState.buffering;
+      case ProcessingState.ready:
+        return AudioProcessingState.ready;
+      case ProcessingState.completed:
+        return AudioProcessingState.completed;
+    }
+  }
 }

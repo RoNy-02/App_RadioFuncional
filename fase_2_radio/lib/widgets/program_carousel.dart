@@ -77,14 +77,8 @@ class _RadioStationsCarouselState extends State<RadioStationsCarousel> {
                   setState(() {
                     _currentIndex = index;
                   });
-                  // Cambiar la estación al deslizar
                   final audio = context.read<AudioProvider>();
-                  // Si está reproduciendo, reproducir la nueva; si está pausada, solo cargar
-                  if (audio.isPlaying) {
-                    audio.playRadio(Stations[index].Url, Stations[index].name);
-                  } else {
-                    audio.setRadio(Stations[index].Url, Stations[index].name);
-                  }
+                  audio.setStation(Stations[index]);
                 },
                 itemCount: Stations.length,
                 itemBuilder: (context, index) {
@@ -374,14 +368,14 @@ class SocialMediaButtons extends StatelessWidget {
               child: Card(
                 elevation: 6,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15.0),
+                  borderRadius: BorderRadius.circular(50),
                 ),
                 child: Container(
                   width: 100,
                   height: 100,
                   decoration: BoxDecoration(
                     color: Theme.of(context).cardColor,
-                    borderRadius: BorderRadius.circular(15.0),
+                    borderRadius: BorderRadius.circular(50),
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,

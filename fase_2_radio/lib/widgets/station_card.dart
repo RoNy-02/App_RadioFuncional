@@ -38,7 +38,12 @@ class EstacionCard extends StatelessWidget {
                   const SizedBox(height: 6),
                   Text(station.slogan, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w400), textAlign: TextAlign.center),
                   IconButton(
-                    onPressed: () async => audio.isPlaying ? await audio.pause() : await audio.playRadio(station.Url, station.name),
+                    onPressed: () async {
+                      if (audio.currentStation?.id != station.id) {
+                        await audio.setStation(station);
+                      }
+                      audio.isPlaying ? await audio.pause() : await audio.play();
+                    },
                     icon: Icon(audio.isPlaying ? Icons.pause : Icons.play_arrow, color: Colors.white, size: 40),
                   ),
                 ],

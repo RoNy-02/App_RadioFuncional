@@ -230,7 +230,7 @@ class _PlayerScreenState extends State<PlayerScreen>
                     const SizedBox(height: 40),
                     Consumer<AudioProvider>(
                       builder: (_, ap, __) {
-                        final meta = ap.currentMetadataTitle;
+                        final meta = ap.currentStation?.name ?? station.name;
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
@@ -253,7 +253,7 @@ class _PlayerScreenState extends State<PlayerScreen>
                         return Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            IconButton(iconSize: 60, onPressed: isLoading ? null : () => ap.playPreviousStation(), icon: const Icon(Icons.skip_previous, color: Colors.white)),
+                            IconButton(iconSize: 60, onPressed: isLoading ? null : () => ap.previous(), icon: const Icon(Icons.skip_previous, color: Colors.white)),
                             IconButton(
                               iconSize: 100,
                               onPressed: isLoading ? null : () { isPlaying ? ap.pause() : ap.play(); },
@@ -263,7 +263,7 @@ class _PlayerScreenState extends State<PlayerScreen>
                                 child: isLoading ? const SizedBox(width: 40, height: 40, child: CircularProgressIndicator(strokeWidth: 5, valueColor: AlwaysStoppedAnimation<Color>(Colors.black))) : Icon(isPlaying ? Icons.pause : Icons.play_arrow, color: Colors.black, size: 45),
                               ),
                             ),
-                            IconButton(iconSize: 60, onPressed: isLoading ? null : () => ap.playNextStation(), icon: const Icon(Icons.skip_next, color: Colors.white)),
+                            IconButton(iconSize: 60, onPressed: isLoading ? null : () => ap.next(), icon: const Icon(Icons.skip_next, color: Colors.white)),
                           ],
                         );
                       },
