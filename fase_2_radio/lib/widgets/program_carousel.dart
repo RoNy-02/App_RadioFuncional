@@ -59,12 +59,15 @@ class _RadioStationsCarouselState extends State<RadioStationsCarousel> {
         // Título de la sección
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-          child: Text(
-            'Estaciones de Radio',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+          child: Text.rich(TextSpan(
+            children: [
+              TextSpan(
+                text: "Nuestras",
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold,color: Colors.black)),  //Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold))
+              TextSpan(text: " Estaciones",
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold,color: Colors.amberAccent)),
+            ]
+          ))
         ),
         // Carrusel con altura fija
         Column(
@@ -86,26 +89,62 @@ class _RadioStationsCarouselState extends State<RadioStationsCarousel> {
                 },
               ),
             ),
-            // Indicadores de página
+            // Indicadores de página con su imagen
             Padding(
               padding: const EdgeInsets.all(12.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(
-                  Stations.length,
-                  (index) => Container(
-                    height: 8,
-                    width: _currentIndex == index ? 24 : 8,
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                    decoration: BoxDecoration(
-                      color: _currentIndex == index
-                          ? Theme.of(context).primaryColor
-                          : const Color.fromARGB(255, 0, 0, 0),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
-                ),
-              ),
+              child:Row(
+  mainAxisAlignment: MainAxisAlignment.center,
+  children: List.generate(
+    Stations.length,
+    (index) {
+      final station = Stations[index];
+      final isActive = _currentIndex == index;
+
+      return GestureDetector(
+        onTap: () {
+          // 👇 Mover el carrusel
+          _pageController.animateToPage(
+            index,
+            duration: const Duration(milliseconds: 400),
+            curve: Curves.easeInOut,
+          );
+
+          // 👇 Cambiar estación
+          final audio = context.read<AudioProvider>();
+          audio.setStation(station);
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          margin: const EdgeInsets.symmetric(horizontal: 5),
+          width: isActive ? 50 : 40,
+          height: isActive ? 50 : 40,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: isActive
+                  ? Theme.of(context).primaryColor
+                  : Colors.transparent,
+              width: 3,
+            ),
+            boxShadow: isActive
+                ? [
+                    BoxShadow(
+                      color: Theme.of(context).primaryColor.withOpacity(0.5),
+                      blurRadius: 10,
+                    )
+                  ]
+                : [],
+          ),
+          child: ClipOval(
+            child: station.image.startsWith('http')
+                ? Image.network(station.image, fit: BoxFit.cover)
+                : Image.asset(station.image, fit: BoxFit.cover),
+          ),
+        ),
+      );
+    },
+  ),
+),
             ),
           ],
         ),
@@ -154,7 +193,23 @@ class _FeaturedCarouselState extends State<FeaturedCarousel> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(padding: const EdgeInsets.fromLTRB(16, 16, 16, 12), child: Text('Nuestros Programas', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold))),
+        Padding(padding:
+         const EdgeInsets.fromLTRB(16, 16, 16, 12),
+          child: Text.rich(TextSpan(
+            children: [
+              TextSpan(
+                text: "Nuestros ",
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold,
+                color: Colors.black)),
+              TextSpan(
+                text: "Programas",
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold,
+                color: Colors.amberAccent)),
+              
+              ]
+            )
+          )
+        ),
         Column(
           children: [
             SizedBox(

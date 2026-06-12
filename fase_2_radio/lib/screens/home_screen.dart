@@ -4,133 +4,199 @@ import 'package:fase_2_radio/widgets/program_carousel.dart';
 import 'package:fase_2_radio/widgets/mini_player.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
-  
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      extendBodyBehindAppBar: false,
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(70),
+
+return Scaffold(
+  extendBodyBehindAppBar: true, // 🔥 FIX
+
+  backgroundColor: Colors.white, // 🔥 evita fondo blanco
+
+  appBar: PreferredSize(
+    preferredSize: const Size.fromHeight(90), // 🔥 ajustado
+    child: SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: ClipRRect(
-          borderRadius: const BorderRadius.vertical(bottom: Radius.circular(50)),
+          borderRadius: BorderRadius.circular(20),
           child: AppBar(
+            toolbarHeight: 80,
+            elevation: 0,
+            surfaceTintColor: Colors.transparent,
+            backgroundColor: Colors.transparent,
+            shadowColor: Colors.transparent,
+            automaticallyImplyLeading: false,
+
             flexibleSpace: Container(
               decoration: const BoxDecoration(
-                image: DecorationImage(image: AssetImage("assets/images/appbar.jpg"), fit: BoxFit.cover),
-              ),
-            ),
-            elevation: 15,
-            centerTitle: true,
-            titleTextStyle: const TextStyle(fontSize:20),
-            title: const Text("RadiactivaX", style: TextStyle(fontFamily:"Roboto",fontWeight: FontWeight.bold,fontSize: 40),),
-            backgroundColor: Color.fromARGB(255, 84, 0, 253),
-            shadowColor: const Color.fromARGB(255, 7, 83, 214),
-            actions: const [Icon(Icons.more_vert, color: Color(0xffffffff))],
-          ),
-        ),
-      ),
-        drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-            children: [
-              const DrawerHeader(
-                decoration: BoxDecoration(
-                  color: Color.fromARGB(255, 30, 20, 20),
-                  border: Border(top: BorderSide(color: Colors.white38)),
-                  image: DecorationImage(image: AssetImage("assets/images/logo_drawer.png"),
-                  fit: BoxFit.cover
-                  )
+                image: DecorationImage(
+                  image: AssetImage("assets/images/appbar.jpg"),
+                  fit: BoxFit.cover,
                 ),
-                child: Text("RadioActiva",style: TextStyle(fontSize: 20, color: Color(0xffffffff), fontFamily: "Roboto")),
               ),
-              const ListTile(
-                leading: Icon(Icons.dark_mode),
-                title: Text("Modo oscuro"),
-              ),
-              ListTile(
-                leading: const Icon(Icons.share),
-                title: const Text('Comparte con un amigo'),
-                onTap: () async {
-                  Navigator.pop(context);
-                  await Share.share('¡Escucha nuestra app de radio! Descárgala aquí: https://play.google.com/store/apps/details?id=com.radioactivatx.radio', subject: 'Recomendación de app');
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.star),
-                title: const Text('¡Califica nuestra app!'),
-                onTap: () {
-                Navigator.pop(context);
-
-                _launchURL('market://details?id=com.radioactivatx.radio');
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.people),
-                title: const Text('Nuestra Misión'),
-                onTap: () {
-                Navigator.pop(context);
-                _launchURL('https://www.radioactivatx.org/acerca-de/');
-              },
             ),
-              ListTile(
-                leading: Icon(Icons.description),
-                title: const Text('Política de Privacidad'),
-                onTap: () {
-                Navigator.pop(context);
-                _launchURL(
-                  'https://www.radioactivatx.org/politica-privacidad/',
+
+            leading: Builder(
+              builder: (context) {
+                return IconButton(
+                  icon: const Icon(Icons.menu, color: Colors.black),
+                  onPressed: () {
+                    Scaffold.of(context).openDrawer();
+                  },
                 );
               },
             ),
-              ListTile(
-                leading: Icon(Icons.radio),
-                title: const Text('Escúchanos en'),
-                onTap: () {
-                Navigator.pop(context);
-                _launchURL('https://www.radioactivatx.org/streaming/');
-              },
+
+            title: Image.asset(
+              "assets/images/Navbar_logo.png",
+              height: 100, // 🔥 FIX
             ),
-              const ListTile(
-                leading: Icon(Icons.update),
-                title: Text("Versión 1.0.0"),
-              ),
-            ]
+            centerTitle: true,
           ),
         ),
-        //CARRUSEL Y MINI PLAYER
-        body: Stack(
+      ),
+    ),
+  ),
+
+
+      drawer: Drawer(
+        child: MediaQuery.removePadding(
+          context: context,
+          removeBottom: true,
+          removeTop: true,
+        child: ListView(
+          padding: EdgeInsets.zero,
           children: [
-            SingleChildScrollView(//agregando para que el reproductor no tape las redes sociales
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 110),
-                child: ProgramCarousel(),
-              ),
+            SizedBox(
+              height: 250,
+              child: DrawerHeader(
+                margin: EdgeInsets.zero,
+                padding: EdgeInsets.zero,
+                child: Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.bottomCenter,
+                      end: Alignment.topCenter,
+                      colors: [
+                        Color.fromARGB(255, 0, 0, 0),
+                        Color.fromARGB(255, 255, 208, 0),
+                      ],
+                    ),
+                  ),
+                  child: Center(
+                    child: Image.asset(
+                      "assets/images/Navbar_logo.png",
+                      fit: BoxFit.contain,
+                      height: 200, //  control tamaño
+                    ),
+                  ),
+                ),
+              ), 
             ),
-            // Mini Player en la parte inferior
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: MiniPlayer(),
+
+            const ListTile(
+              leading: Icon(Icons.dark_mode),
+              title: Text("Modo oscuro"),
+            ),
+
+            ListTile(
+              leading: const Icon(Icons.share),
+              title: const Text('Comparte con un amigo'),
+              onTap: () async {
+                Navigator.pop(context);
+                await Share.share(
+                  '¡Escucha nuestra app de radio! Descárgala aquí: https://play.google.com/store/apps/details?id=com.radioactivatx.radio',
+                  subject: 'Recomendación de app',
+                );
+              },
+            ),
+
+            ListTile(
+              leading: const Icon(Icons.star),
+              title: const Text('¡Califica nuestra app!'),
+              onTap: () {
+                Navigator.pop(context);
+                _launchURL(
+                    'market://details?id=com.radioactivatx.radio');
+              },
+            ),
+
+            ListTile(
+              leading: const Icon(Icons.people),
+              title: const Text('Nuestra Misión'),
+              onTap: () {
+                Navigator.pop(context);
+                _launchURL(
+                    'https://www.radioactivatx.org/acerca-de/');
+              },
+            ),
+
+            ListTile(
+              leading: const Icon(Icons.description),
+              title: const Text('Política de Privacidad'),
+              onTap: () {
+                Navigator.pop(context);
+                _launchURL(
+                    'https://www.radioactivatx.org/politica-privacidad/');
+              },
+            ),
+
+            ListTile(
+              leading: const Icon(Icons.radio),
+              title: const Text('Escúchanos en'),
+              onTap: () {
+                Navigator.pop(context);
+                _launchURL(
+                    'https://www.radioactivatx.org/streaming/');
+              },
+            ),
+
+            const ListTile(
+              leading: Icon(Icons.update),
+              title: Text("Versión 1.0.0"),
             ),
           ],
-        )
-        );
-    }
+        ),
+      )),
+
+      // MINI PLAYER
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 110),
+              child: const ProgramCarousel(),
+            ),
+          ),
+
+          //  MINI PLAYER
+          const Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: MiniPlayer(),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _launchURL(String url) async {
-  final Uri uri = Uri.parse(url);
-  try {
-    if (await canLaunchUrl(uri)) {//se uso url_launcher en dependencias
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } else {
-      debugPrint('ERROR: No se pudo lanzar la URL: $url');
+    final Uri uri = Uri.parse(url);
+
+    try {
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri,
+            mode: LaunchMode.externalApplication);
+      } else {
+        debugPrint('No se pudo abrir: $url');
+      }
+    } catch (e) {
+      debugPrint('Error al abrir $url: $e');
     }
-  } catch (e) {
-    debugPrint('Excepción al lanzar URL $url: $e');
   }
 }

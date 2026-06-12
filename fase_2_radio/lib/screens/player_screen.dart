@@ -278,7 +278,6 @@ class _PlayerScreenState extends State<PlayerScreen>
                     alignment: Alignment.bottomCenter,
                     child: GestureDetector(
                       onTap: () {
-                        // ver el día actual y elegir si existe y si no 0
                         final stationId = station.id;
                         final days = stationPrograms[stationId]!.keys.toList();
                         int currentDayIdx = days.indexOf(_getTodayName());

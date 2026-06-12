@@ -5,6 +5,7 @@ import '../constants.dart';
 
 class AudioProvider with ChangeNotifier {
   AudioHandler? _audioHandler;
+  
 
   StationModel? _currentStation;
   bool _isPlaying = false;
@@ -14,9 +15,11 @@ class AudioProvider with ChangeNotifier {
   bool get isPlaying => _isPlaying;
   bool get isLoading => _isLoading;
   
+  
 
   void setHandler(AudioHandler handler) {
     _audioHandler = handler;
+    
 
     _audioHandler!.playbackState.listen((state) {
       _isPlaying = state.playing;
@@ -24,6 +27,7 @@ class AudioProvider with ChangeNotifier {
           state.processingState == AudioProcessingState.loading ||
           state.processingState == AudioProcessingState.buffering;
       notifyListeners();
+      
     });
 
     _audioHandler!.mediaItem.listen((item) {
@@ -32,10 +36,13 @@ class AudioProvider with ChangeNotifier {
       if (idx != -1) {
         _currentStation = stations[idx];
         notifyListeners();
+        
       }
     });
   }
 //estacion
+
+    
   Future<void> setStation(StationModel station) async {
     if (_audioHandler == null) return;
 

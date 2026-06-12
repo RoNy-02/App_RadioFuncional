@@ -31,6 +31,8 @@ class RadioAudioHandler extends BaseAudioHandler with SeekHandler {
   void _updateMediaItem() {
     final station = _currentStation;
 
+    if (_currentStation?.id == station.id) return;///esto se agrego/////////
+
     Uri? artUri;
     if (station.imageUrl != null && station.imageUrl!.isNotEmpty) {
       artUri = Uri.parse(station.imageUrl!);
@@ -49,14 +51,27 @@ class RadioAudioHandler extends BaseAudioHandler with SeekHandler {
       ),
     );
   }
-  Future<void> setUrl(String url, {int? index}) async {
+Future<void> setUrl(String url, {int? index}) async {
+  try {
     if (index != null) {
       _currentIndex = index;
+      _updateMediaItem();
     }
 
-    _updateMediaItem();
     await _player.setUrl(url);
+
+  } catch (e) {
+    print('Error al cargar URL: $e');
+
+    //para no tener crasheos con el indicador de estacion-
+    playbackState.add(
+      playbackState.value.copyWith(
+        playing: false,
+        processingState: AudioProcessingState.error,
+      ),
+    );
   }
+}
 
   @override
   Future customAction(String name, [Map<String, dynamic>? extras]) async {
